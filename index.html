@@ -347,37 +347,101 @@ function toggleOther(){
 }
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyTZLFlzHmIfVeCEo1KsEZK66LPfyy-y-tWAsBNqvrif-UWwIphQyGlnjcQtBmxayWQGA/exec";
 
+function isValidEmail(email){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function isValidPhone(phone){
+  return /^[0-9]{9,10}$/.test(phone);
+}
+
 function submitData(){
+  const name = fullname.value.trim();
+  const emailVal = email.value.trim();
+  const phoneVal = phone.value.trim();
+  const org = organization.value.trim();
+  const prod = product.value;
+  const other = otherProduct.value.trim();
+
+  /* ===== REQUIRED (ยกเว้น other) ===== */
+  if(!name || !emailVal || !phoneVal || !org || !prod){
+    alert(lang==="th"
+      ? "กรุณากรอกข้อมูลให้ครบถ้วน"
+      : "Please fill in all required fields"
+    );
+    return;
+  }
+
+  /* ===== EMAIL ===== */
+  if(!isValidEmail(emailVal)){
+    alert(lang==="th"
+      ? "รูปแบบอีเมลไม่ถูกต้อง"
+      : "Invalid email format"
+    );
+    return;
+  }
+
+  /* ===== PHONE ===== */
+  if(!isValidPhone(phoneVal)){
+    alert(lang==="th"
+      ? "กรุณากรอกเบอร์โทร 9–10 หลัก"
+      : "Phone number must be 9–10 digits"
+    );
+    return;
+  }
+
+  /* ===== OTHER (บังคับเฉพาะเมื่อเลือก Other) ===== */
+  if(prod === "Other" && !other){
+    alert(lang==="th"
+      ? "กรุณาระบุสินค้าอื่น"
+      : "Please specify other product"
+    );
+    return;
+  }
+
+  /* ===== SEND TO GOOGLE SCRIPT ===== */
   const payload = {
-    name: fullname.value,
-    email: email.value,
-    phone: phone.value,
-    organization: organization.value,
-    product: product.value,
-    other: otherProduct.value || ""
+    name: name,
+    email: emailVal,
+    phone: phoneVal,
+    organization: org,
+    product: prod,
+    other: prod === "Other" ? other : ""
   };
 
-  fetch(SCRIPT_URL, {
-    method: "POST",
-    body: JSON.stringify(payload)
+  fetch(SCRIPT_URL,{
+    method:"POST",
+    body:JSON.stringify(payload)
   })
-  .then(res => res.json())
-  .then(res => {
-    if(res.status === "success"){
-      alert(lang==="th"?"ส่งข้อมูลเรียบร้อย ✅":"Submitted successfully ✅");
-    } else {
-      throw new Error(res.message);
+  .then(res=>res.json())
+  .then(res=>{
+    if(res.status==="success"){
+      alert(lang==="th"
+        ? "ส่งข้อมูลเรียบร้อย ✅"
+        : "Submitted successfully ✅"
+      );
+
+      // clear form
+      document.querySelectorAll("input,select").forEach(el=>{
+        if(el.type!=="button") el.value="";
+      });
+      toggleOther();
+    }else{
+      throw new Error();
     }
   })
-  .catch(err=>{
-    console.error(err);
-    alert(lang==="th"?"เกิดข้อผิดพลาด ❌":"Submission failed ❌");
+  .catch(()=>{
+    alert(lang==="th"
+      ? "เกิดข้อผิดพลาด ❌"
+      : "Submission failed ❌"
+    );
   });
 }
 </script>
 
 </body>
 </html>
+
 
 
 
