@@ -437,28 +437,10 @@ function submitData(){
     );
   });
 }
-  function generateLuckyNumbers(){
-  let numbers = [];
-  
-  while(numbers.length < 5){
-    let rand = Math.floor(Math.random() * 30) + 1;
-    if(!numbers.includes(rand)){
-      numbers.push(rand);
-    }
-  }
-
-  numbers.sort((a,b)=>a-b);
-
-  const resultText = lang==="th"
-    ? "Lucky Numbers ของคุณคือ:\n" + numbers.join(" • ")
-    : "Your Lucky Numbers are:\n" + numbers.join(" • ");
-
-  document.getElementById("luckyResult").innerText = resultText;
-}
 </script>
-
 </body>
 </html>
+
 
 
 
